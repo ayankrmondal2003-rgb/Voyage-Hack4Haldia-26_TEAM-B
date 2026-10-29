@@ -11,7 +11,9 @@ import {
   Type, 
   Undo2, 
   Redo2,
-  GripVertical
+  GripVertical,
+  Minimize2,
+  Maximize2
 } from 'lucide-react';
 
 const TOOLS = [
@@ -34,6 +36,7 @@ export default function Toolbar({
   onUndo,
   onRedo
 }) {
+  // 1. Position State
   const [pos, setPos] = useState(() => {
     try {
       const saved = localStorage.getItem('funboard_toolbar_pos');
@@ -48,14 +51,38 @@ export default function Toolbar({
     return { x: defaultX, y: 76 };
   });
 
+  // 2. Minimize / Maximize State
+  const [isMinimized, setIsMinimized] = useState(() => {
+    try {
+      return localStorage.getItem('funboard_toolbar_minimized') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  // 3. Scale / Resize State (0.75 to 1.30)
+  const [scale, setScale] = useState(() => {
+    try {
+      const saved = localStorage.getItem('funboard_toolbar_scale');
+      if (saved) {
+        const parsed = parseFloat(saved);
+        if (parsed >= 0.75 && parsed <= 1.35) return parsed;
+      }
+    } catch {}
+    return 1.0;
+  });
+
   const [isDragging, setIsDragging] = useState(false);
   const dragRef = useRef({ startX: 0, startY: 0, originX: 0, originY: 0, active: false });
+
+  const [isResizing, setIsResizing] = useState(false);
+  const resizeRef = useRef({ startX: 0, startY: 0, startScale: 1.0, active: false });
 
   // Keep within viewport if window is resized
   useEffect(() => {
     const handleResize = () => {
       setPos(prev => ({
-        x: Math.max(10, Math.min(window.innerWidth - 200, prev.x)),
+        x: Math.max(10, Math.min(window.innerWidth - 120, prev.x)),
         y: Math.max(70, Math.min(window.innerHeight - 60, prev.y))
       }));
     };
@@ -63,6 +90,29 @@ export default function Toolbar({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Save minimize state
+  function toggleMinimize() {
+    setIsMinimized(prev => {
+      const next = !prev;
+      try { localStorage.setItem('funboard_toolbar_minimized', String(next)); } catch {}
+      return next;
+    });
+  }
+
+  // Cycle scale presets: 0.85 -> 1.0 -> 1.15 -> 0.85
+  function cycleScale(e) {
+    e.stopPropagation();
+    setScale(prev => {
+      let next = 1.0;
+      if (prev < 0.95) next = 1.0;
+      else if (prev < 1.10) next = 1.15;
+      else next = 0.85;
+      try { localStorage.setItem('funboard_toolbar_scale', String(next)); } catch {}
+      return next;
+    });
+  }
+
+  // Dragging Handlers
   const handlePointerDown = (e) => {
     if (e.button !== 0 && e.pointerType === 'mouse') return;
     dragRef.current = {
@@ -80,7 +130,7 @@ export default function Toolbar({
     if (!dragRef.current.active) return;
     const dx = e.clientX - dragRef.current.startX;
     const dy = e.clientY - dragRef.current.startY;
-    const newX = Math.max(10, Math.min(window.innerWidth - 100, dragRef.current.originX + dx));
+    const newX = Math.max(10, Math.min(window.innerWidth - 80, dragRef.current.originX + dx));
     const newY = Math.max(70, Math.min(window.innerHeight - 60, dragRef.current.originY + dy));
     setPos({ x: newX, y: newY });
   };
@@ -95,19 +145,105 @@ export default function Toolbar({
     } catch {}
   };
 
+  // Resize Corner Drag Handlers
+  const handleResizeDown = (e) => {
+    e.stopPropagation();
+    if (e.button !== 0 && e.pointerType === 'mouse') return;
+    resizeRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      startScale: scale,
+      active: true
+    };
+    setIsResizing(true);
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+
+  const handleResizeMove = (e) => {
+    if (!resizeRef.current.active) return;
+    e.stopPropagation();
+    const dx = e.clientX - resizeRef.current.startX;
+    const nextScale = Math.max(0.75, Math.min(1.30, resizeRef.current.startScale + dx / 350));
+    const rounded = Math.round(nextScale * 100) / 100;
+    setScale(rounded);
+  };
+
+  const handleResizeUp = (e) => {
+    if (!resizeRef.current.active) return;
+    resizeRef.current.active = false;
+    setIsResizing(false);
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+      localStorage.setItem('funboard_toolbar_scale', String(scale));
+    } catch {}
+  };
+
+  const currentToolObj = TOOLS.find(t => t.id === activeTool) || TOOLS[2];
+  const CurrentIcon = currentToolObj.icon;
+
+  // -----------------------------------------------------------------
+  // 1. MINIMIZED VIEW (Floating Compact Pill)
+  // -----------------------------------------------------------------
+  if (isMinimized) {
+    return (
+      <div 
+        className="fixed z-30 select-none touch-none"
+        style={{ left: `${pos.x}px`, top: `${pos.y}px` }}
+      >
+        <div 
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerUp}
+          className={`bg-white border-[2.5px] border-black rounded-2xl px-2.5 py-1.5 shadow-[4px_4px_0px_#000] flex items-center gap-2 cursor-grab ${
+            isDragging ? 'cursor-grabbing shadow-[6px_6px_0px_#000] scale-[1.03]' : ''
+          } transition-transform duration-75`}
+        >
+          <GripVertical size={16} strokeWidth={2.5} className="text-gray-400" />
+          
+          <div className="w-8 h-8 rounded-xl bg-[#fef08a] border-2 border-black flex items-center justify-center shadow-[1px_1px_0px_#000]">
+            <CurrentIcon size={16} strokeWidth={2.5} className="text-black" />
+          </div>
+
+          <span className="font-black text-xs text-black">
+            {currentToolObj.label}
+          </span>
+
+          <button
+            type="button"
+            onClick={toggleMinimize}
+            onPointerDown={e => e.stopPropagation()}
+            className="p-1.5 rounded-xl hover:bg-gray-100 border border-black/40 hover:border-black text-black cursor-pointer ml-1"
+            title="Expand Toolbar"
+          >
+            <Maximize2 size={13} strokeWidth={2.5} />
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // -----------------------------------------------------------------
+  // 2. MAXIMIZED VIEW (Full Toolbar with Scale & Resize)
+  // -----------------------------------------------------------------
   return (
     <div 
       className="fixed z-30 select-none touch-none"
-      style={{ left: `${pos.x}px`, top: `${pos.y}px` }}
+      style={{ 
+        left: `${pos.x}px`, 
+        top: `${pos.y}px`,
+        transform: `scale(${scale})`,
+        transformOrigin: 'top left'
+      }}
     >
       <div 
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
-        className={`bg-white border-[2.5px] border-black rounded-2xl px-2.5 py-1.5 shadow-[4px_4px_0px_#000] flex items-center gap-1.5 cursor-grab ${
-          isDragging ? 'cursor-grabbing shadow-[6px_6px_0px_#000] scale-[1.02]' : ''
-        } transition-transform duration-75`}
+        className={`relative bg-white border-[2.5px] border-black rounded-2xl px-2.5 py-1.5 shadow-[4px_4px_0px_#000] flex items-center gap-1.5 cursor-grab ${
+          isDragging ? 'cursor-grabbing shadow-[6px_6px_0px_#000] scale-[1.01]' : ''
+        } ${isResizing ? 'ring-2 ring-blue-500' : ''} transition-transform duration-75`}
       >
         {/* Drag Handle Indicator */}
         <div 
@@ -185,6 +321,43 @@ export default function Toolbar({
           </button>
         </div>
 
+        {/* Divider */}
+        <div className="w-[1.5px] h-6 bg-black/20 mx-1" />
+
+        {/* Panel Controls: Resize Scale Preset & Minimize */}
+        <div className="flex items-center gap-1" onPointerDown={e => e.stopPropagation()}>
+          {/* Quick Scale Toggle (S / M / L) */}
+          <button
+            type="button"
+            onClick={cycleScale}
+            className="px-1.5 py-1 text-[10px] font-black rounded-lg border border-black/30 hover:border-black hover:bg-gray-100 text-gray-700 cursor-pointer"
+            title={`Size: ${Math.round(scale * 100)}% (Click to toggle size)`}
+          >
+            {scale < 0.95 ? 'S' : scale > 1.1 ? 'L' : 'M'}
+          </button>
+
+          {/* Minimize Button */}
+          <button
+            type="button"
+            onClick={toggleMinimize}
+            className="p-1 rounded-lg hover:bg-gray-100 border border-transparent hover:border-black/30 text-gray-600 hover:text-black cursor-pointer"
+            title="Minimize Toolbar"
+          >
+            <Minimize2 size={14} strokeWidth={2.5} />
+          </button>
+        </div>
+
+        {/* Tactile Corner Resize Drag Handle (Bottom Right) */}
+        <div
+          onPointerDown={handleResizeDown}
+          onPointerMove={handleResizeMove}
+          onPointerUp={handleResizeUp}
+          onPointerCancel={handleResizeUp}
+          className="absolute -bottom-1.5 -right-1.5 w-4 h-4 rounded-full bg-black text-white flex items-center justify-center cursor-nwse-resize shadow-sm hover:scale-125 transition-transform"
+          title="Drag corner to smoothly resize toolbar"
+        >
+          <div className="w-1.5 h-1.5 rounded-full bg-yellow-300" />
+        </div>
       </div>
     </div>
   );
