@@ -6,13 +6,15 @@ import {
   Download, 
   ZoomIn, 
   ZoomOut, 
-  RotateCcw 
+  RotateCcw,
+  Sparkles 
 } from 'lucide-react';
 import Brand from './Brand.jsx';
 import DrawingCanvas from './DrawingCanvas.jsx';
 import Toolbar from './Toolbar.jsx';
 import PropertiesPanel from './PropertiesPanel.jsx';
 import PresenceList from './PresenceList.jsx';
+import AiRoadmapModal from './AiRoadmapModal.jsx';
 import useRoom from '../hooks/useRoom.js';
 import { exportBoardToPng } from '../drawing/exportPng.js';
 
@@ -34,6 +36,7 @@ export default function Workspace({ room, onHome }) {
   // UI Notices
   const [copied, setCopied] = useState(false);
   const [notice, setNotice] = useState('');
+  const [aiModalOpen, setAiModalOpen] = useState(false);
 
   const selectedElement = board.strokes.find(s => s.id === selectedId);
 
@@ -132,6 +135,17 @@ export default function Workspace({ room, onHome }) {
 
           {/* Presence Dropdown */}
           <PresenceList presence={board.presence} />
+
+          {/* AI Roadmap & Idea Generator Button */}
+          <button
+            type="button"
+            onClick={() => setAiModalOpen(true)}
+            className="bg-[#fef08a] hover:bg-yellow-200 text-black font-extrabold text-xs px-3.5 py-1.5 rounded-xl border-2 border-black shadow-[2px_2px_0px_#000] active:translate-x-[1px] active:translate-y-[1px] transition-all flex items-center gap-1.5 cursor-pointer"
+            title="Generate AI Roadmap or Idea Mindmap directly on whiteboard"
+          >
+            <Sparkles size={14} strokeWidth={2.5} className="text-black" />
+            <span className="hidden md:inline">AI Roadmap</span>
+          </button>
 
           {/* Export PNG Button */}
           <button
@@ -327,6 +341,23 @@ export default function Workspace({ room, onHome }) {
         <span className="truncate max-w-xs sm:max-w-md">{notice || 'Excalidraw-inspired Whiteboard • Multi-Tool Sync • Per-User Undo/Redo'}</span>
         <span className="hidden sm:inline">Zoom: {Math.round(zoom * 100)}%</span>
       </footer>
+
+      {/* AI Roadmap & Idea Generator Modal */}
+      <AiRoadmapModal
+        isOpen={aiModalOpen}
+        onClose={() => setAiModalOpen(false)}
+        currentCenter={{
+          x: Math.round((typeof window !== 'undefined' ? window.innerWidth / 2 - pan[0] : 400) / zoom),
+          y: Math.round((typeof window !== 'undefined' ? window.innerHeight / 2 - pan[1] : 300) / zoom),
+          roomId: room.roomId,
+          authorId: board.identity.userId
+        }}
+        onGenerate={(elements) => {
+          board.addElements(elements);
+          setNotice(`✨ Placed ${elements.length} AI roadmap elements! Annotate with tools or drag with Select.`);
+          setTimeout(() => setNotice(''), 5000);
+        }}
+      />
     </main>
   );
 }

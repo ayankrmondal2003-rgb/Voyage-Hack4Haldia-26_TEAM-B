@@ -1,6 +1,6 @@
 # Hack4Haldia 2026 — Pull Request Submission Template
 
-**Pull Request Title:** `TEAM-B: FUNBOARD — Real-time Multiplayer Collaborative Whiteboard`
+**Pull Request Title:** `TEAM-B: FUNBOARD — Real-time Multiplayer Collaborative Whiteboard with AI Roadmap Studio`
 **Target Repository:** `Voyage-Hack4Haldia-26/TEAM-B`
 **Target Branch:** `main`
 **Source Branch:** `team-b-solution`
@@ -8,7 +8,7 @@
 ---
 
 ## 📝 Project Summary
-**FUNBOARD (TEAM-B Live Whiteboard)** is a high-performance, real-time multiplayer collaborative drawing application inspired by Excalidraw, designed with a tactile Neo-Brutalist visual aesthetic. Built for Hack4Haldia 2026, it enables distributed engineering and design teams to sketch, diagram, and brainstorm together without login friction.
+**FUNBOARD (TEAM-B Live Whiteboard)** is a high-performance, real-time multiplayer collaborative drawing application inspired by Excalidraw, designed with a tactile Neo-Brutalist visual aesthetic. Built for Hack4Haldia 2026, it enables distributed engineering and design teams to sketch, diagram, brainstorm, and generate interactive AI roadmaps together without login friction.
 
 ## 🚀 Live Demo & Deployment
 - **Live Deployed URL:** *(Insert your Render Web Service URL here)*
@@ -23,6 +23,8 @@
 - [x] **Network Resilience:** Auto-reconnection with persistent outbox queue and idempotent deduplication prevents stroke loss.
 
 ### Advanced Bonus Features (100% Completed)
+- [x] **AI Roadmap & Idea Studio:** Generate 5-phase sequential milestone flowcharts & brainstorm mindmaps onto canvas; fully annotatable with tools!
+- [x] **Draggable Floating UI:** Both toolbar and color styling panels are freely movable anywhere on the screen with persistent memory.
 - [x] **9 Specialized Drawing Tools:** Selection, Pan, Freehand Pen, Eraser, Rectangle, Ellipse, Straight Line, Arrow, and Inline Text.
 - [x] **Per-User Undo/Redo:** `Ctrl+Z` / `Ctrl+Shift+Z` isolates user actions so collaborators never delete each other's work.
 - [x] **Contextual Properties Panel:** Real-time color palette, custom hex picker, stroke thickness, fill styles, and font sizes.
@@ -39,8 +41,8 @@
 - **Design System:** Neo-Brutalism with high-contrast borders and tactile drop shadows
 
 ## 🧪 Testing Verification
-- **22 / 22 Automated Tests Passing (100% pass rate)**
-- Covered: Room lifecycle, Socket rate-limiting, late-join state delivery, element CRUD, per-user undo/redo, canvas DPI scaling, and delta reconciliation.
+- **23 / 23 Automated Tests Passing (100% pass rate)**
+- Covered: Room lifecycle, Socket rate-limiting, late-join state delivery, element CRUD, per-user undo/redo, canvas DPI scaling, delta reconciliation, and AI roadmap generator.
 ```bash
 npm test
 ```
@@ -48,4 +50,3 @@ npm test
 ## 👥 Team B
 - **Team:** Team B
 - **Hackathon:** Hack4Haldia 2026
-

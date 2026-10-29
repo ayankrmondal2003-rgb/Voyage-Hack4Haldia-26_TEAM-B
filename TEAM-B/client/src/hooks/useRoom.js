@@ -228,6 +228,23 @@ export default function useRoom(room) {
     flushRef.current();
   }
 
+  function addElements(newElements) {
+    if (!newElements || !newElements.length) return;
+    const newIds = new Set(newElements.map(e => e.id));
+    const merged = [...pendingRef.current.filter(item => !newIds.has(item.id)), ...newElements];
+    updatePending(merged);
+
+    setUndoStack(prev => [...prev, { type: 'batch-add', elements: newElements }]);
+    setRedoStack([]);
+
+    setBoard(curr => ({
+      ...curr,
+      strokes: [...curr.strokes.filter(s => !newIds.has(s.id)), ...newElements]
+    }));
+
+    flushRef.current();
+  }
+
   function updateElement(strokeId, updates, recordUndo = true) {
     const existing = boardRef.current.strokes.find(s => s.id === strokeId);
     if (!existing) return;
@@ -295,6 +312,10 @@ export default function useRoom(room) {
       // Undo add -> delete element
       deleteElement(action.element.id, false);
       setRedoStack(prev => [...prev, action]);
+    } else if (action.type === 'batch-add') {
+      // Undo batch add -> delete all generated elements
+      action.elements.forEach(el => deleteElement(el.id, false));
+      setRedoStack(prev => [...prev, action]);
     } else if (action.type === 'delete') {
       // Undo delete -> restore element
       restoreElement(action.element.id);
@@ -315,6 +336,10 @@ export default function useRoom(room) {
     if (action.type === 'add') {
       // Redo add -> restore element
       restoreElement(action.element.id);
+      setUndoStack(prev => [...prev, action]);
+    } else if (action.type === 'batch-add') {
+      // Redo batch add -> restore all elements
+      action.elements.forEach(el => restoreElement(el.id));
       setUndoStack(prev => [...prev, action]);
     } else if (action.type === 'delete') {
       // Redo delete -> delete element
@@ -366,6 +391,7 @@ export default function useRoom(room) {
     cursors: Object.values(cursors),
     preview,
     complete,
+    addElements,
     updateElement,
     deleteElement,
     undo,

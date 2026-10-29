@@ -2,7 +2,7 @@
 ### Hack4Haldia 2026 — Final Hackathon Submission
 > **Tagline:** *"Create together. Draw together. Think together."*
 
-[![Tests](https://img.shields.io/badge/tests-22%2F22%20passing-brightgreen)](#automated-testing)
+[![Tests](https://img.shields.io/badge/tests-23%2F23%20passing-brightgreen)](#automated-testing)
 [![Node](https://img.shields.io/badge/node-%3E%3D22.12.0-blue)](#prerequisites)
 [![Stack](https://img.shields.io/badge/tech%20stack-React%20%7C%20Node%20%7C%20Socket.IO%20%7C%20MongoDB-orange)](#tech-stack)
 
@@ -42,6 +42,8 @@ Modern distributed software, design, and engineering teams frequently struggle t
 ### Advanced Bonus Features (All 100% Completed)
 | Feature | Status | Implementation Details |
 |---|---|---|
+| **AI Roadmap & Idea Studio** | ✅ Done | Generate 5-phase structured milestone flowcharts and radiating brainstorm mindmaps directly onto the canvas. Fully interactive & annotatable! |
+| **Draggable Panels** | ✅ Done | Both the drawing toolbar and color/styling panel can be dragged anywhere on the screen with persistent memory. |
 | **9 Drawing Tools** | ✅ Done | Select (`V`), Pan (`H`), Pen (`P`), Eraser (`E`), Rectangle (`R`), Ellipse (`O`), Line (`L`), Arrow (`A`), Text (`T`). |
 | **Per-User Undo / Redo** | ✅ Done | `Ctrl+Z` / `Ctrl+Shift+Z`. Undoing only rolls back the current user's actions without affecting collaborators' work. |
 | **Contextual Properties Panel** | ✅ Done | Dynamic styling panel for Stroke Color (palette + custom HEX), Fill Color, Stroke Width, and Text Font Size. |

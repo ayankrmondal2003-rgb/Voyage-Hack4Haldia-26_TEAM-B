@@ -4,6 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { existsSync } from 'node:fs';
 import { roomRoutes } from './routes/rooms.js';
+import { aiRoutes } from './routes/ai.js';
 import { unavailableStore } from './storage/rooms.js';
 import { createRoomService } from './services/roomState.js';
 
@@ -21,6 +22,7 @@ export function createApp({ rooms = createRoomService(unavailableStore()), origi
   }));
 
   app.use('/api/rooms', roomRoutes(rooms));
+  app.use('/api/ai', aiRoutes());
   app.use('/api', (_req, res) => res.status(404).json({ error: 'API endpoint not found.' }));
 
   const client = fileURLToPath(new URL('../../client/dist/', import.meta.url));
