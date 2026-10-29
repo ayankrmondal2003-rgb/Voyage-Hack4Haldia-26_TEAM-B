@@ -1,3 +1,4 @@
+import { useState, useRef, useEffect } from 'react';
 import { 
   MousePointer2, 
   Hand, 
@@ -9,7 +10,8 @@ import {
   ArrowRight, 
   Type, 
   Undo2, 
-  Redo2 
+  Redo2,
+  GripVertical
 } from 'lucide-react';
 
 const TOOLS = [
@@ -32,12 +34,91 @@ export default function Toolbar({
   onUndo,
   onRedo
 }) {
+  const [pos, setPos] = useState(() => {
+    try {
+      const saved = localStorage.getItem('funboard_toolbar_pos');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (typeof parsed.x === 'number' && typeof parsed.y === 'number') {
+          return parsed;
+        }
+      }
+    } catch {}
+    const defaultX = typeof window !== 'undefined' ? Math.max(10, (window.innerWidth - 480) / 2) : 200;
+    return { x: defaultX, y: 76 };
+  });
+
+  const [isDragging, setIsDragging] = useState(false);
+  const dragRef = useRef({ startX: 0, startY: 0, originX: 0, originY: 0, active: false });
+
+  // Keep within viewport if window is resized
+  useEffect(() => {
+    const handleResize = () => {
+      setPos(prev => ({
+        x: Math.max(10, Math.min(window.innerWidth - 200, prev.x)),
+        y: Math.max(70, Math.min(window.innerHeight - 60, prev.y))
+      }));
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const handlePointerDown = (e) => {
+    if (e.button !== 0 && e.pointerType === 'mouse') return;
+    dragRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      originX: pos.x,
+      originY: pos.y,
+      active: true
+    };
+    setIsDragging(true);
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+
+  const handlePointerMove = (e) => {
+    if (!dragRef.current.active) return;
+    const dx = e.clientX - dragRef.current.startX;
+    const dy = e.clientY - dragRef.current.startY;
+    const newX = Math.max(10, Math.min(window.innerWidth - 100, dragRef.current.originX + dx));
+    const newY = Math.max(70, Math.min(window.innerHeight - 60, dragRef.current.originY + dy));
+    setPos({ x: newX, y: newY });
+  };
+
+  const handlePointerUp = (e) => {
+    if (!dragRef.current.active) return;
+    dragRef.current.active = false;
+    setIsDragging(false);
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+      localStorage.setItem('funboard_toolbar_pos', JSON.stringify(pos));
+    } catch {}
+  };
+
   return (
-    <div className="fixed top-20 left-1/2 -translate-x-1/2 z-30 select-none">
-      <div className="bg-white border-[2.5px] border-black rounded-2xl px-3 py-1.5 shadow-[4px_4px_0px_#000] flex items-center gap-1.5 overflow-x-auto max-w-[95vw]">
-        
+    <div 
+      className="fixed z-30 select-none touch-none"
+      style={{ left: `${pos.x}px`, top: `${pos.y}px` }}
+    >
+      <div 
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+        className={`bg-white border-[2.5px] border-black rounded-2xl px-2.5 py-1.5 shadow-[4px_4px_0px_#000] flex items-center gap-1.5 cursor-grab ${
+          isDragging ? 'cursor-grabbing shadow-[6px_6px_0px_#000] scale-[1.02]' : ''
+        } transition-transform duration-75`}
+      >
+        {/* Drag Handle Indicator */}
+        <div 
+          className="p-1 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-black cursor-grab active:cursor-grabbing flex items-center justify-center -ml-0.5"
+          title="Drag toolbar anywhere on screen"
+        >
+          <GripVertical size={16} strokeWidth={2.5} />
+        </div>
+
         {/* Drawing Tools */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1" onPointerDown={e => e.stopPropagation()}>
           {TOOLS.map((t) => {
             const Icon = t.icon;
             const isSelected = activeTool === t.id;
@@ -68,7 +149,7 @@ export default function Toolbar({
         <div className="w-[1.5px] h-6 bg-black/20 mx-1" />
 
         {/* Undo & Redo */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1" onPointerDown={e => e.stopPropagation()}>
           <button
             type="button"
             disabled={!canUndo}
