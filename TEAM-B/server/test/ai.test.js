@@ -50,3 +50,4 @@ test('AI Roadmap & Idea Generator endpoint (/api/ai/generate)', async t => {
   assert.equal(data3.ok, true);
   assert.equal(data3.plan.phases.length, 5);
 });
+

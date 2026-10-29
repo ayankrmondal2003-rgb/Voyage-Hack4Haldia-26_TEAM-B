@@ -615,3 +615,4 @@ export function generateCanvasElements(plan, { centerX = 400, centerY = 300, roo
 
   return elements;
 }
+
