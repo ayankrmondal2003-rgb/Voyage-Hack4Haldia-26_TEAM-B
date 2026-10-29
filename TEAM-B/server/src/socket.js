@@ -3,8 +3,14 @@ import { ROOM_ID, UUID, validateStroke, validateElement, problem, userProfile } 
 
 export function attachSocketServer(server, origins, rooms) {
   const io = new Server(server, {
-    cors: { origin: origins }, maxHttpBufferSize: 128 * 1024,
-    allowRequest: (req, done) => done(null, !req.headers.origin || origins.includes(req.headers.origin)),
+    cors: { origin: origins.includes('*') ? '*' : origins }, 
+    maxHttpBufferSize: 128 * 1024,
+    allowRequest: (req, done) => {
+      const origin = req.headers.origin;
+      const host = req.headers.host;
+      const sameHost = Boolean(host && origin && (origin === 'https://' + host || origin === 'http://' + host || origin.endsWith(host)));
+      done(null, !origin || origins.includes('*') || origins.includes(origin) || sameHost);
+    },
   });
   const members = new Map();
   const channel = id => 'board:' + id;
