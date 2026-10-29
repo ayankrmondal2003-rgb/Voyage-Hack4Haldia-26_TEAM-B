@@ -23,7 +23,7 @@
 - [x] **Network Resilience:** Auto-reconnection with persistent outbox queue and idempotent deduplication prevents stroke loss.
 
 ### Advanced Bonus Features (100% Completed)
-- [x] **AI Roadmap & Idea Studio:** Generate 5-phase sequential milestone flowcharts & brainstorm mindmaps onto canvas; fully annotatable with tools!
+- [x] **AI Innovation & Execution Studio:** Generate full Idea-to-Execution Blueprints (Concept ➔ Validation ➔ Tech ➔ Sprint ➔ Launch), Idea Brainstorms, and Milestones directly onto canvas; fully interactive & annotatable!
 - [x] **Draggable Floating UI:** Both toolbar and color styling panels are freely movable anywhere on the screen with persistent memory.
 - [x] **9 Specialized Drawing Tools:** Selection, Pan, Freehand Pen, Eraser, Rectangle, Ellipse, Straight Line, Arrow, and Inline Text.
 - [x] **Per-User Undo/Redo:** `Ctrl+Z` / `Ctrl+Shift+Z` isolates user actions so collaborators never delete each other's work.

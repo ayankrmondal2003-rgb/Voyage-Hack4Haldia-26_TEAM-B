@@ -1,44 +1,49 @@
 import { Router } from 'express';
 
-const KNOWLEDGE_BASE = {
-  'fullstack': {
-    title: 'Full-Stack Web Architecture',
-    phases: [
-      { title: 'Phase 1: Architecture & Data', color: '#bbf7d0', tasks: ['Schema modeling in MongoDB', 'REST & WebSocket API design', 'Security & CORS configuration'] },
-      { title: 'Phase 2: Frontend Foundation', color: '#e0f2fe', tasks: ['React 19 + Vite canvas workspace', 'High-DPI 2D coordinate rendering', 'State synchronization engine'] },
-      { title: 'Phase 3: Real-Time Sync', color: '#fef08a', tasks: ['Socket.IO room isolation', 'Sub-30ms stroke streaming', 'Outbox retry & reconciliation'] },
-      { title: 'Phase 4: Testing & Hardening', color: '#fca5a5', tasks: ['Automated acceptance tests', 'Per-user undo/redo ownership', 'DPI scaling & math validation'] },
-      { title: 'Phase 5: Cloud Deployment', color: '#f3e8ff', tasks: ['Render web service hosting', 'Atlas replica set connection', 'Live multi-user demo'] }
-    ]
-  },
-  'ai-agent': {
-    title: 'Autonomous AI Agent Architecture',
-    phases: [
-      { title: 'Phase 1: Agent Scope & Tooling', color: '#bbf7d0', tasks: ['Define agent objective & constraints', 'Model context window budgeting', 'MCP tool protocol integration'] },
-      { title: 'Phase 2: Execution Sandbox', color: '#e0f2fe', tasks: ['Safe sandbox environment setup', 'State persistence & audit logs', 'Real-time telemetry streaming'] },
-      { title: 'Phase 3: Reasoning Engine', color: '#fef08a', tasks: ['Chain-of-thought prompt strategy', 'Vector embeddings & RAG pipeline', 'Hallucination verification checks'] },
-      { title: 'Phase 4: Multi-Agent Swarm', color: '#fca5a5', tasks: ['Delegation & consensus protocol', 'Parallel task decomposition', 'Error escalation & fallback'] },
-      { title: 'Phase 5: Production Launch', color: '#f3e8ff', tasks: ['Latency & token cost optimization', 'Benchmark evaluation tests', 'Live operational dashboard'] }
-    ]
-  }
-};
-
 export function aiRoutes() {
   const router = Router();
 
   router.post('/generate', async (req, res) => {
-    const { topic = '', mode = 'roadmap' } = req.body || {};
-    const query = String(topic).trim().toLowerCase();
+    const { topic = '', mode = 'execution' } = req.body || {};
+    const cleanTitle = (topic ? String(topic).trim() : 'Project Idea').replace(/^\w/, c => c.toUpperCase());
 
-    // Check pre-configured templates
-    for (const [key, preset] of Object.entries(KNOWLEDGE_BASE)) {
-      if (query.includes(key)) {
-        return res.json({ ok: true, plan: { ...preset, mode } });
-      }
+    // 1. EXECUTION BLUEPRINT
+    if (mode === 'execution') {
+      return res.json({
+        ok: true,
+        plan: {
+          title: cleanTitle,
+          mode: 'execution',
+          stages: [
+            { badge: '01', name: 'Core Concept & USP', color: '#fef08a', tasks: [`Core Problem: Friction in ${cleanTitle}`, 'Unique Value: 10x faster & intuitive workflow', 'Differentiator: Real-time multiplayer + AI assistance', 'Hero Feature: Zero-setup browser access'] },
+            { badge: '02', name: 'Market & Validation', color: '#bbf7d0', tasks: ['Target Persona: Builders, engineers & remote teams', 'Validation Test: 48h landing page smoke test', 'Early Adopters: Hackathon teams & tech communities', 'Success Metric: 25% weekly active retention'] },
+            { badge: '03', name: 'Tech Architecture', color: '#e0f2fe', tasks: ['Frontend: React 19 + High-DPI Canvas 2D engine', 'Backend: Node.js Express + WebSocket (Socket.IO)', 'Persistence: MongoDB Atlas transactional replica set', 'AI Integration: Structured semantic synthesis pipeline'] },
+            { badge: '04', name: 'Sprint Execution Plan', color: '#fca5a5', tasks: ['Sprint 1: Scaffold auth-free rooms & base canvas', 'Sprint 2: Real-time stroke streaming & outbox retry', 'Sprint 3: AI roadmap & idea execution engine', 'Sprint 4: End-to-end tests, PNG export & polish'] },
+            { badge: '05', name: 'Launch & Pitch Strategy', color: '#f3e8ff', tasks: ['Public Hosting: Render web service cloud hosting', 'Growth Rail: ProductHunt, GitHub & Twitter launch', 'Monetization: Free tier + Team workspace plan', 'Judge Pitch: 2-minute live multiplayer demonstration'] }
+          ]
+        }
+      });
     }
 
-    const cleanTitle = (topic ? String(topic).trim() : 'Project Roadmap').replace(/^\w/, c => c.toUpperCase());
+    // 2. IDEATION STUDIO
+    if (mode === 'ideation') {
+      return res.json({
+        ok: true,
+        plan: {
+          title: cleanTitle,
+          mode: 'ideation',
+          center: { title: `💡 Innovation Hub: ${cleanTitle}`, subtitle: 'Brainstormed Breakthrough Concepts', color: '#fef08a' },
+          ideas: [
+            { title: `${cleanTitle} AI Co-Pilot`, color: '#bbf7d0', tasks: ['Problem: Slow manual workflows', 'Killer Feature: Autonomous reasoning & step suggestions', 'Audience: Fast-moving teams'] },
+            { title: `Decentralized ${cleanTitle} Network`, color: '#e0f2fe', tasks: ['Problem: High platform fees & vendor lock-in', 'Killer Feature: Direct P2P protocol & instant settlement', 'Audience: Independent creators'] },
+            { title: `Real-time ${cleanTitle} Canvas`, color: '#fca5a5', tasks: ['Problem: Context switching across multiple fragmented apps', 'Killer Feature: Unified whiteboard with live collaboration', 'Audience: Distributed engineering teams'] },
+            { title: `Automated ${cleanTitle} Auditor`, color: '#f3e8ff', tasks: ['Problem: Compliance errors & missed edge cases', 'Killer Feature: Instant scanning with auto-remediation PRs', 'Audience: Enterprise organizations'] }
+          ]
+        }
+      });
+    }
 
+    // 3. MINDMAP
     if (mode === 'mindmap') {
       return res.json({
         ok: true,
@@ -56,7 +61,7 @@ export function aiRoutes() {
       });
     }
 
-    // Default 5-phase roadmap
+    // 4. ROADMAP
     res.json({
       ok: true,
       plan: {
@@ -75,4 +80,3 @@ export function aiRoutes() {
 
   return router;
 }
-
