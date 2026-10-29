@@ -136,15 +136,15 @@ export default function Workspace({ room, onHome }) {
           {/* Presence Dropdown */}
           <PresenceList presence={board.presence} />
 
-          {/* AI Roadmap & Idea Generator Button */}
+          {/* AI Generator Button */}
           <button
             type="button"
             onClick={() => setAiModalOpen(true)}
             className="bg-[#fef08a] hover:bg-yellow-200 text-black font-extrabold text-xs px-3.5 py-1.5 rounded-xl border-2 border-black shadow-[2px_2px_0px_#000] active:translate-x-[1px] active:translate-y-[1px] transition-all flex items-center gap-1.5 cursor-pointer"
-            title="Generate AI Roadmap or Idea Mindmap directly on whiteboard"
+            title="FUNBOARD AI Studio: Ideas, Execution Blueprints & Roadmaps"
           >
             <Sparkles size={14} strokeWidth={2.5} className="text-black" />
-            <span className="hidden md:inline">AI Roadmap</span>
+            <span className="font-black">AI</span>
           </button>
 
           {/* Export PNG Button */}
@@ -354,7 +354,7 @@ export default function Workspace({ room, onHome }) {
         }}
         onGenerate={(elements) => {
           board.addElements(elements);
-          setNotice(`✨ Placed ${elements.length} AI roadmap elements! Annotate with tools or drag with Select.`);
+          setNotice(`✨ Placed ${elements.length} AI elements! Annotate with tools or drag with Select.`);
           setTimeout(() => setNotice(''), 5000);
         }}
       />
